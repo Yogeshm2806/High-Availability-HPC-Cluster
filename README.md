@@ -88,3 +88,63 @@ Pacemaker controls:
 - Database Service
 - Slurm Services
 - VIP Movement
+
+---
+3️⃣ Configure Corosync Cluster
+
+apt install pacemaker corosync pcs drbd-utils mariadb-server slurm-wlm
+
+pcs cluster auth MasterNode PassiveMaster
+pcs cluster setup SlurmHA MasterNode PassiveMaster
+pcs cluster start --all
+
+4️⃣ Configure DRBD
+Create resource:
+
+/etc/drbd.d/slurm_data.res
+Initialize:
+
+drbdadm create-md slurm_data
+drbdadm up slurm_data
+Promote Primary:
+
+drbdadm primary --force slurm_data
+
+5️⃣ Filesystem Setup
+mkfs.ext4 /dev/drbd0
+mount /dev/drbd0 /var/spool/slurm
+
+6️⃣ Create Pacemaker Resources
+pcs resource create slurm_data_res ocf:linbit:drbd ...
+pcs resource create slurm_fs Filesystem ...
+pcs resource create mariadb systemd:mariadb
+pcs resource create slurmdbd_res systemd:slurmdbd
+pcs resource create slurm_ctld_res systemd:slurmctld
+pcs resource create virtual_ip ocf:heartbeat:IPaddr2 ...
+
+7️⃣ Resource Group Example
+DRBD
+ → Filesystem
+   → MariaDB
+     → SlurmDBD
+       → SlurmCTLD
+         → VIP
+
+🔄 Failover Testing
+Move Resources
+pcs node standby PassiveMaster
+Check Cluster
+pcs status
+Slurm Health
+scontrol ping
+sinfo
+
+📊 DRBD Sync Monitoring
+cat /proc/drbd
+watch -n1 drbdadm status
+
+Output:
+
+Primary/Secondary
+SyncSource / SyncTarget
+UpToDate/Inconsistent
