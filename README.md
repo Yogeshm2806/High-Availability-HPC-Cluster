@@ -26,6 +26,29 @@ The objective is to provide **automatic failover of Slurm Controller services** 
 ---
 
 ## 🧱 Architecture
+Users
+ ↓
+WireGuard VPN
+ ↓
+OnDemand Web Portal
+ ↓
+Login Node
+ ↓
+Slurm VIP
+ ↓
+Active Controller (Pacemaker)
+ ↓
+DRBD Replicated Storage
+ ↓
+Compute Nodes
+
+Monitoring Layer:
+
+Prometheus ← exporters on all nodes
+     ↓
+Alertmanager
+     ↓
+Grafana Dashboards
 
 
 ---
@@ -44,8 +67,6 @@ The objective is to provide **automatic failover of Slurm Controller services** 
 
 ---
 
-
----
 
 ## 🧩 Key Features
 
