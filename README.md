@@ -148,3 +148,37 @@ Output:
 Primary/Secondary
 SyncSource / SyncTarget
 UpToDate/Inconsistent
+
+---
+
+## 🚨 Common Issues Faced
+
+
+---
+
+## 📈 Project Outcomes
+
+Fully functional HA Slurm cluster
+
+Successful automatic failover
+
+Replicated scheduler state
+
+Stable cluster communication
+
+Production-grade HPC control plane
+
+---
+
+## 🧪 Validation
+
+Controller Failover Successful
+
+DRBD Replication Verified
+
+Job Scheduling Survived Node Failure
+
+VIP Migration Confirmed
+
+Resource Ordering Enforced
+---
