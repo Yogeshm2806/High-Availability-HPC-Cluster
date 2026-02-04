@@ -28,6 +28,7 @@ The objective is to provide **automatic failover of Slurm Controller services** 
 ## 🧱 Architecture
 
 
+---
 
 ### 🔗 Core Components
 
@@ -42,13 +43,7 @@ The objective is to provide **automatic failover of Slurm Controller services** 
 | MariaDB | Job Accounting Storage |
 
 ---
-Pacemaker controls:
 
-- DRBD Promotion/Demotion
-- Filesystem Mount
-- Database Service
-- Slurm Services
-- VIP Movement
 
 ---
 
@@ -65,3 +60,10 @@ Pacemaker controls:
 ---
 ## ⚙️ Cluster Resource Flow
 
+Pacemaker controls:
+
+- DRBD Promotion/Demotion
+- Filesystem Mount
+- Database Service
+- Slurm Services
+- VIP Movement
