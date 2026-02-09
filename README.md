@@ -1,14 +1,20 @@
 # 🚀 High Availability Slurm Cluster using Pacemaker, Corosync & DRBD
 
 ## 📌 Project Overview
+This project implements a production-grade High Availability HPC cluster using Slurm with automated failover, secure remote access, centralized authentication, web-based job management, and full monitoring/alerting.
 This project implements a **Highly Available (HA) Slurm Workload Manager cluster** using:
-
+- Highly available job scheduling
+- Secure remote HPC access
+- Centralized user authentication
+- Web-based user interaction
+- Automated failover
 - Pacemaker (Cluster Resource Manager)
 - Corosync (Cluster Communication Layer)
 - DRBD (Block-Level Data Replication)
 - Virtual IP Failover
 - MariaDB for Slurm Accounting
 - Shared Slurm State Storage
+- Full observability and alerting
 
 The objective is to provide **automatic failover of Slurm Controller services** with minimal downtime while ensuring data consistency across controller nodes.
 
