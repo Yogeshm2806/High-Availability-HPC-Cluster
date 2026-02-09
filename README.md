@@ -91,6 +91,35 @@ Grafana Dashboards
 ---
 ## ⚙️ Configurations
 
+
+#### Deployment Steps 
+##### Infrastructure Setup
+
+1. Install Linux on all nodes
+2. Configure networking & DNS
+3. Setup LDAP server
+4. Configure WireGuard VPN
+
+##### Cluster Setup
+5. Install Slurm on all nodes
+6. Setup DRBD replication
+7. Configure Pacemaker + Corosync
+8. Create Virtual IP resource
+9. Configure Slurm HA services
+
+##### Access Layer
+
+10. Configure Login Node
+11. Install Open OnDemand
+12. Integrate LDAP authentication
+
+##### Monitoring
+
+13. Install Prometheus
+14. Configure exporters
+15. Setup Alertmanager
+16. Deploy Grafana dashboards
+---
 ### 🌐 1. DNS Server Setup
 
 ```bash
@@ -172,6 +201,21 @@ systemctl enable wg-quick@wg0 --now
 ```
 ### 🌐 6. Open OnDemand Web Portal
 Web-based HPC job submission interface.
+Features:
+
+Web-based shell
+
+Job submission interface
+
+Interactive apps
+
+File browser
+
+HPC dashboard
+
+Authentication handled via LDAP.
+
+Users access cluster through browser without SSH.
 ```
 apt install ondemand -y
 nano /etc/ood/config/clusters.d/hpc.yml
@@ -190,7 +234,10 @@ Visualization for cluster monitoring.
 apt install grafana -y
 systemctl enable grafana-server --now
 ```
-
+Access
+```
+http://monitoring-node:3000
+```
 ### Resource Group Example
 DRBD
  → Filesystem
