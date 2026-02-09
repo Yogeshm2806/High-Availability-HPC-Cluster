@@ -201,18 +201,12 @@ systemctl enable wg-quick@wg0 --now
 ```
 ### 🌐 6. Open OnDemand Web Portal
 Web-based HPC job submission interface.
-Features:
-
+##### Features:
 Web-based shell
-
 Job submission interface
-
 Interactive apps
-
 File browser
-
 HPC dashboard
-
 Authentication handled via LDAP.
 
 Users access cluster through browser without SSH.
