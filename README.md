@@ -74,13 +74,13 @@ Grafana Dashboards
 ---
 ## ⚙️ Cluster Resource Flow
 
-Pacemaker controls:
+# Pacemaker controls:
 - Dual Slurm Controllers
 - DRBD replicated spool & database storage
 - Pacemaker resource orchestration
 - Automatic failover
 - Virtual IP migration
-## Failover Targets -
+# Failover Targets -
 1. slurmctld
 2. slurmdbd
 3. MariaDB
