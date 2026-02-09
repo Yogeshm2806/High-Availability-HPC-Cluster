@@ -72,28 +72,21 @@ Grafana Dashboards
 | MariaDB | Job Accounting Storage |
 
 ---
-
-
-## 🧩 Key Features
-
-✅ Automatic Failover  
-✅ Controller Redundancy  
-✅ Data Replication  
-✅ Virtual IP Switching  
-✅ DRBD Synchronous Mode  
-✅ Pacemaker Resource Groups  
-✅ Service Ordering Constraints  
-
----
 ## ⚙️ Cluster Resource Flow
 
 Pacemaker controls:
-
-- DRBD Promotion/Demotion
-- Filesystem Mount
-- Database Service
-- Slurm Services
-- VIP Movement
+- Dual Slurm Controllers
+- DRBD replicated spool & database storage
+- Pacemaker resource orchestration
+- Automatic failover
+- Virtual IP migration
+## Failover Targets -
+1. slurmctld
+2. slurmdbd
+3. MariaDB
+4. DRBD storage
+5. Filesystem mount
+6. Virtual IP
 
 ---
 3️⃣ Configure Corosync Cluster
