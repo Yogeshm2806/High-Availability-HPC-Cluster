@@ -89,14 +89,14 @@ Grafana Dashboards
 6. Virtual IP
 
 ---
-3️⃣ Configure Corosync Cluster
+## 3️⃣ Configure Corosync Cluster
 
+```bash
 apt install pacemaker corosync pcs drbd-utils mariadb-server slurm-wlm
-
 pcs cluster auth MasterNode PassiveMaster
 pcs cluster setup SlurmHA MasterNode PassiveMaster
 pcs cluster start --all
-
+```
 4️⃣ Configure DRBD
 Create resource:
 
