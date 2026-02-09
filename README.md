@@ -130,12 +130,55 @@ systemctl restart bind9
 
 ### 👥 2. LDAP Authentication
 Centralized user authentication for HPC users.
+##### LDAP provides:
+- Centralized user accounts
+- Shared UID/GID
+- Secure authentication
+- Consistent login across nodes
+##### LDAP integrated with:
+
+1. Login Node
+2. Open OnDemand
 ```bash
 apt install slapd ldap-utils -y
 dpkg-reconfigure slapd
 apt install libnss-ldap libpam-ldap nscd -y
 ```
+Set:
+1. Domain: hpccluster.com
+2. Org: HPCCluster
 
+##### Create Base LDAP Structure
+```
+ldapadd -x -D cn=admin,dc=hpccluster,dc=com -W -f base.ldif
+```
+Example:
+```
+ou=People
+ou=Groups
+ou=HPCUsers
+```
+##### Add LDAP Client to ALL Nodes
+
+Install:
+```
+apt install libnss-ldap libpam-ldap ldap-utils nscd
+```
+
+Configure:
+```
+/etc/ldap/ldap.conf
+```
+```
+BASE dc=hpccluster,dc=com
+```
+##### Enable LDAP Authentication
+```
+pam-auth-update
+```
+Enable:
+1. LDAP Authentication
+2. Create Home Directory
 ### 💾 3. DRBD Storage Replication
 Replicated Slurm spool and database storage.
 ```bash
@@ -183,46 +226,124 @@ pcs resource create mariadb systemd:mariadb
 pcs resource create slurmdbd_res systemd:slurmdbd
 pcs resource create slurm_ctld_res systemd:slurmctld
 ```
-### 🚨 5. Alertmanager
+```
+Pacemaker
+   |
+   +-- DRBD (Primary/Secondary)
+          |
+          +-- /var/spool/slurm
+                  |
+                  +-- Slurmctld
+                  +-- Slurmdbd
+                  +-- MariaDB
+                  +-- SlurmVIP
+```
+### 🔐 5. WireGuard VPN Setup
+Secure communication between user & cluster nodes.
+##### WireGuard provides:
+- Encrypted remote HPC access
+- Private cluster network exposure
+- Secure admin access
+- Reduced public attack surface
+- Users connect via VPN before accessing:
+- Login Node
+- Web Portal
+- Monitoring
+  
+```
+apt install wireguard -y
+wg genkey | tee privatekey | wg pubkey > publickey
+nano /etc/wireguard/wg0.conf
+```
+##### On Controller:
+```
+[Interface]
+Address = 10.10.10.1/24
+PrivateKey = <key>
+ListenPort = 51820
+
+[Peer]
+PublicKey = <clientkey>
+AllowedIPs = 10.10.10.2/32
+```
+
+Start:
+```
+systemctl enable wg-quick@wg0 --now
+
+```
+Test:
+```
+wg
+ping 10.10.10.2
+```
+
+### 🌐 6. Open OnDemand Web Portal
+Web-based HPC job submission interface.
+##### Features:
+- Web-based shell
+- Job submission interface
+- Interactive apps
+- File browser
+- HPC dashboard
+- Authentication handled via LDAP.
+- Users access cluster through browser without SSH.
+
+##### Start OOD
+
+```
+apt install ondemand -y
+nano /etc/ood/config/clusters.d/hpc.yml
+systemctl restart ondemand
+/opt/ood/ood-portal-generator/sbin/update_ood_portal
+```
+##### Authentication Integration
+
+```
+/etc/ood/config/ood_portal.yml
+```
+```
+auth:
+  - 'AuthType Basic'
+  - 'AuthName "HPC Portal"'
+  - 'AuthBasicProvider ldap'
+```
+
+### 🚨 7. Alertmanager
 Alerting system for failures and thresholds.
+
+##### Triggers alerts on:
+
+- Controller failure
+- Node down
+- DRBD sync failure
+- Slurmctld crash
+- Database failure
+- High CPU/memory
+- Service downtime
+  
 ```bash
 apt install prometheus-alertmanager -y
 nano /etc/alertmanager/alertmanager.yml
 systemctl restart prometheus-alertmanager
 ```
-### 🔐 6. WireGuard VPN Setup
-Secure communication between user & cluster nodes.
-
-```
-apt install wireguard -y
-wg genkey | tee privatekey | wg pubkey > publickey
-nano /etc/wireguard/wg0.conf
-systemctl enable wg-quick@wg0 --now
-```
-### 🌐 6. Open OnDemand Web Portal
-Web-based HPC job submission interface.
-##### Features:
-Web-based shell
-Job submission interface
-Interactive apps
-File browser
-HPC dashboard
-Authentication handled via LDAP.
-
-Users access cluster through browser without SSH.
-```
-apt install ondemand -y
-nano /etc/ood/config/clusters.d/hpc.yml
-systemctl restart ondemand
-```
-### 📊 7. Monitoring – Prometheus
+### 📊 8. Monitoring – Prometheus
 Cluster metrics collection.
+### Collects metrics from:
+
+- Slurm services
+- DRBD replication
+- Pacemaker cluster
+- System resources
+- Network interfaces
+- VPN
+
 ```
 apt install prometheus -y
 apt install prometheus-node-exporter -y
 systemctl enable prometheus --now
 ```
-### 📈 8. Grafana Dashboard
+### 📈 9. Grafana Dashboard
 Visualization for cluster monitoring.
 ```
 apt install grafana -y
@@ -240,7 +361,7 @@ DRBD
        → SlurmCTLD
          → VIP
 
-### 🧪 9. Failover Testing
+### 🧪 10. Failover Testing
 ```
 pcs node standby MasterNode
 pcs status
@@ -255,7 +376,7 @@ scontrol ping
 - scontrol ping
 - sinfo
 
-### 🧰 10. Validation Commands
+### 🧰 11. Validation Commands
 ```
 pcs status
 drbdadm status
