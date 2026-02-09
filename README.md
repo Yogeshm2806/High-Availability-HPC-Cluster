@@ -89,39 +89,104 @@ Grafana Dashboards
 6. Virtual IP
 
 ---
-## 3️⃣ Configure Corosync Cluster
+## 3️⃣ Configurations
+
+### 🌐 1. DNS Server Setup
 
 ```bash
-apt install pacemaker corosync pcs drbd-utils mariadb-server slurm-wlm
-pcs cluster auth MasterNode PassiveMaster
+apt install bind9 -y
+nano /etc/bind/named.conf.local
+systemctl restart bind9
+```
+
+### 👥 2. LDAP Authentication
+```bash
+apt install slapd ldap-utils -y
+dpkg-reconfigure slapd
+apt install libnss-ldap libpam-ldap nscd -y
+```
+
+### 💾 3. DRBD Storage Replication
+```bash
+apt install drbd-utils -y
+```
+
+#### Filesystem Setup
+```bash
+mkfs.ext4 /dev/drbd0
+mount /dev/drbd0 /var/spool/slurm
+nano /etc/drbd.d/slurm_data.res
+drbdadm create-md slurm_data
+drbdadm up slurm_data
+drbdadm primary --force slurm_data
+```
+#### 📊 DRBD Sync Monitoring
+```
+cat /proc/drbd
+watch -n1 drbdadm status
+```
+Output:
+```
+Primary/Secondary
+SyncSource / SyncTarget
+UpToDate/Inconsistent
+```
+
+### 🧠 4. Pacemaker + Corosync Cluster
+```bash
+apt install pacemaker corosync pcs -y
+systemctl enable pcsd --now
+pcs host auth MasterNode PassiveMaster
 pcs cluster setup SlurmHA MasterNode PassiveMaster
 pcs cluster start --all
 ```
-4️⃣ Configure DRBD
-Create resource:
 
-/etc/drbd.d/slurm_data.res
-Initialize:
+###🗄️ 5. MariaDB Accounting Database
 
-drbdadm create-md slurm_data
-drbdadm up slurm_data
-Promote Primary:
+```bash
+apt install mariadb-server -y
+mysql_secure_installation
+mysql -u root -p
+```
 
-drbdadm primary --force slurm_data
-
-5️⃣ Filesystem Setup
-mkfs.ext4 /dev/drbd0
-mount /dev/drbd0 /var/spool/slurm
-
-6️⃣ Create Pacemaker Resources
-pcs resource create slurm_data_res ocf:linbit:drbd ...
-pcs resource create slurm_fs Filesystem ...
+#### 🔁 6. Pacemaker Resource Creation
+```bash
+pcs resource create slurm_data_res ocf:linbit:drbd drbd_resource=slurm_data
+pcs resource create slurm_fs ocf:heartbeat:Filesystem device=/dev/drbd0 directory=/var/spool/slurm fstype=ext4
+pcs resource create virtual_ip ocf:heartbeat:IPaddr2 ip=<VIP> cidr_netmask=24
 pcs resource create mariadb systemd:mariadb
 pcs resource create slurmdbd_res systemd:slurmdbd
 pcs resource create slurm_ctld_res systemd:slurmctld
-pcs resource create virtual_ip ocf:heartbeat:IPaddr2 ...
+```
+### 🚨 7. Alertmanager
+Alerting system for failures and thresholds.
+```bash
+apt install prometheus-alertmanager -y
+nano /etc/alertmanager/alertmanager.yml
+systemctl restart prometheus-alertmanager
+```
+### 🌐 8. Open OnDemand Web Portal
+Web-based HPC job submission interface.
+```
+apt install ondemand -y
+nano /etc/ood/config/clusters.d/hpc.yml
+systemctl restart ondemand
+```
+### 📊 9. Monitoring – Prometheus
+Cluster metrics collection.
+```
+apt install prometheus -y
+apt install prometheus-node-exporter -y
+systemctl enable prometheus --now
+```
+### 📈 10. Grafana Dashboard
+Visualization for cluster monitoring.
+```
+apt install grafana -y
+systemctl enable grafana-server --now
+```
 
-7️⃣ Resource Group Example
+### Resource Group Example
 DRBD
  → Filesystem
    → MariaDB
@@ -129,24 +194,30 @@ DRBD
        → SlurmCTLD
          → VIP
 
-🔄 Failover Testing
-Move Resources
-pcs node standby PassiveMaster
-Check Cluster
+###🧪 11. Failover Testing
+```
+pcs node standby MasterNode
 pcs status
-Slurm Health
 scontrol ping
-sinfo
+```
+##### Failover Testing
+- Move Resources
+- pcs node standby PassiveMaster
+- Check Cluster
+- pcs status
+- Slurm Health
+- scontrol ping
+- sinfo
 
-📊 DRBD Sync Monitoring
+### 🧰 12. Validation Commands
+```
+pcs status
+drbdadm status
 cat /proc/drbd
-watch -n1 drbdadm status
-
-Output:
-
-Primary/Secondary
-SyncSource / SyncTarget
-UpToDate/Inconsistent
+sinfo
+squeue
+sacct
+```
 
 ---
 
