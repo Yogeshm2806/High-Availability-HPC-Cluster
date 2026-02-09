@@ -89,7 +89,7 @@ Grafana Dashboards
 6. Virtual IP
 
 ---
-## 3️⃣ Configurations
+## ⚙️ Configurations
 
 ### 🌐 1. DNS Server Setup
 
@@ -100,6 +100,7 @@ systemctl restart bind9
 ```
 
 ### 👥 2. LDAP Authentication
+Centralized user authentication for HPC users.
 ```bash
 apt install slapd ldap-utils -y
 dpkg-reconfigure slapd
@@ -107,6 +108,7 @@ apt install libnss-ldap libpam-ldap nscd -y
 ```
 
 ### 💾 3. DRBD Storage Replication
+Replicated Slurm spool and database storage.
 ```bash
 apt install drbd-utils -y
 ```
@@ -133,6 +135,7 @@ UpToDate/Inconsistent
 ```
 
 ### 🧠 4. Pacemaker + Corosync Cluster
+High availability cluster manager.
 ```bash
 apt install pacemaker corosync pcs -y
 systemctl enable pcsd --now
@@ -157,6 +160,15 @@ Alerting system for failures and thresholds.
 apt install prometheus-alertmanager -y
 nano /etc/alertmanager/alertmanager.yml
 systemctl restart prometheus-alertmanager
+```
+### 🔐 6. WireGuard VPN Setup
+Secure communication between user & cluster nodes.
+
+```
+apt install wireguard -y
+wg genkey | tee privatekey | wg pubkey > publickey
+nano /etc/wireguard/wg0.conf
+systemctl enable wg-quick@wg0 --now
 ```
 ### 🌐 6. Open OnDemand Web Portal
 Web-based HPC job submission interface.
@@ -187,7 +199,7 @@ DRBD
        → SlurmCTLD
          → VIP
 
-###🧪 9. Failover Testing
+### 🧪 9. Failover Testing
 ```
 pcs node standby MasterNode
 pcs status
