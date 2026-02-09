@@ -141,15 +141,8 @@ pcs cluster setup SlurmHA MasterNode PassiveMaster
 pcs cluster start --all
 ```
 
-###🗄️ 5. MariaDB Accounting Database
 
-```bash
-apt install mariadb-server -y
-mysql_secure_installation
-mysql -u root -p
-```
-
-#### 🔁 6. Pacemaker Resource Creation
+#### Pacemaker Resource Creation
 ```bash
 pcs resource create slurm_data_res ocf:linbit:drbd drbd_resource=slurm_data
 pcs resource create slurm_fs ocf:heartbeat:Filesystem device=/dev/drbd0 directory=/var/spool/slurm fstype=ext4
@@ -158,28 +151,28 @@ pcs resource create mariadb systemd:mariadb
 pcs resource create slurmdbd_res systemd:slurmdbd
 pcs resource create slurm_ctld_res systemd:slurmctld
 ```
-### 🚨 7. Alertmanager
+### 🚨 5. Alertmanager
 Alerting system for failures and thresholds.
 ```bash
 apt install prometheus-alertmanager -y
 nano /etc/alertmanager/alertmanager.yml
 systemctl restart prometheus-alertmanager
 ```
-### 🌐 8. Open OnDemand Web Portal
+### 🌐 6. Open OnDemand Web Portal
 Web-based HPC job submission interface.
 ```
 apt install ondemand -y
 nano /etc/ood/config/clusters.d/hpc.yml
 systemctl restart ondemand
 ```
-### 📊 9. Monitoring – Prometheus
+### 📊 7. Monitoring – Prometheus
 Cluster metrics collection.
 ```
 apt install prometheus -y
 apt install prometheus-node-exporter -y
 systemctl enable prometheus --now
 ```
-### 📈 10. Grafana Dashboard
+### 📈 8. Grafana Dashboard
 Visualization for cluster monitoring.
 ```
 apt install grafana -y
@@ -194,7 +187,7 @@ DRBD
        → SlurmCTLD
          → VIP
 
-###🧪 11. Failover Testing
+###🧪 9. Failover Testing
 ```
 pcs node standby MasterNode
 pcs status
@@ -209,7 +202,7 @@ scontrol ping
 - scontrol ping
 - sinfo
 
-### 🧰 12. Validation Commands
+### 🧰 10. Validation Commands
 ```
 pcs status
 drbdadm status
